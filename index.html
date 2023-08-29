@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <link rel="stylesheet" href="./public/css/style.css" />
+
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <link rel="icon" href="./public/img/logo_256x256.png">
+
+    <title>Generador</title>
+  </head>
+  <body>
+    <div class="left" style="font-size: 12px;">
+            Nombre o Nick del streamer que aparecerá en la imagen.<br>
+            <input type="text" id="playerName" class="playerName" placeholder="Nombre del jugador" oninput=""><br><br>
+
+            Nombre del logo del streamer en la carpeta 'img'(Casi siempre es el mismo nombre que el de arriba).<br>
+            <input type="text" id="playerLogo" class="playerLogo" placeholder="Imagen del jugador" oninput=""><br><br>
+
+            Razón de muerte.<br>
+            <input type="text" id="playerDeathReason" class="playerDeathReason" placeholder="Razón de muerte 1" oninput=""><br><br>
+            Si quieres añadir una segunda linea escribela aqui.
+            <input type="text" id="playerDeathReason2" class="playerDeathReason" placeholder="Razón de muerte 2" oninput=""><br><br>
+
+            Este es el numero que aparece en el 'Día: ?',cambialo segun el día.<br>
+            <input type="text" id="deathDay" class="deathDay" placeholder="Día" oninput=""><br><br>
+
+            Este parametro generará una imagen que diga que el jugador fue expulsado de la serie por inactividad contexto en mayusculas. Cambialo a true para activarlo (con todo y las "").<br>
+            <input type="checkbox" id="isKicked" class="isKicked"><br>
+            Sirve para cambiar la razón de la expulsión, si quieres cambiarla recuerda ponerlo en mayusculas y este no es necesario usar '\n' para añadir lineas, si no quieres cambiarla dejala en "null" (con todo y las "").<br>
+            <input type="text" id="kickedReason" class="kickedReason" placeholder="Razón de kick" oninput=""><br><br>
+
+            Este parametro generará una imagen con los colores de los giles (los colores invertidos que aparecian cuando anunciaste a los giles en twitter/x.com).Cambialo a true para activarlo (con todo y las "").<br>
+            <input type="checkbox" id="isGil" class="isGil"><br><br>
+
+            Este parametro añadira un efecto amarillo alrededor del logo del streamer y cambiara el color de 'Muerte:' a amarillo.Cambialo a true para activarlo (con todo y las "").<br>
+            <input type="checkbox" id="isWinner" class="isWinner"><br><br>
+    </div>
+    <div class="center">
+        <p>
+            <ol start="0">
+                <li>IcraK</li>
+                <li>PinkyChan</li>
+                <li>Kayzend</li>
+                <li>Ruxxs</li>
+                <li>Facha</li>
+                <li>Expersito</li>
+                <li>IrvinTovar</li>
+                <li>Litolmic</li>
+                <li>Grymps</li>
+                <li>Linoyasu</li>
+                <li>Slender</li>
+                <li>Santyh</li>
+                <li>NesquiPlay</li>
+                <li>SonPancho</li>
+                <li>ElEpic</li>
+                <li>Clay</li>
+                <li>DieguioPlay</li>
+                <li>Speakerman</li>
+                <li>ItsEbani</li>
+                <li>Bolo128</li>
+                <li>Nacho714</li>
+                <li>Hermanos Liu</li>
+            </ol>
+        </p>
+        
+        <button name="submitChanges" onclick="submitChanges()">Cargar Cambios</button>
+        <button name="downloadButton" onclick="downloadImg()">Descargar</button>
+
+    </div>
+    <div class="right">
+      <canvas id="canvas" width="720px" height="1080px"></canvas>
+
+      <script type="text/javascript">
+        var playerName = document.getElementById("playerName");
+        var playerLogo = document.getElementById("playerLogo");
+  
+        var playerDeathReason = document.getElementById("playerDeathReason");
+        var playerDeathReason2 = document.getElementById("playerDeathReason2");
+
+        var deathDay = document.getElementById("deathDay");
+  
+        var isKicked = document.getElementById("isKicked");
+        var kickedReason = document.getElementById("kickedReason");
+  
+        var isGil = document.getElementById("isGil");
+        var isWinner = document.getElementById("isWinner");
+
+        var canvas = document.getElementById("canvas");
+        var ctx = canvas.getContext("2d");
+
+        const blankImg = new Image();
+        const bgImg = new Image();
+        const logoImg = new Image();
+
+
+
+
+
+
+
+
+
+
+
+        const simpleTextStyler = (function(){
+            const simpleTextStyler = {
+                sizes: [],
+                baseSize: undefined,
+                font: undefined,
+                controlChars: "{}\n\t",
+                spaceSize: 0,
+                tabSize: 8, // in spaceSize units
+                tabs: (function() {var t = []; for(var i=0; i < 100; i += 8){t.push(i);}; return t;})(),
+                getNextTab: function(x) {
+                    var i = 0;
+                    while (i < this.tabs.length) {
+                        if (x < this.tabs[i] * this.tabSize * this.spaceSize) {
+                            return this.tabs[i] * this.tabSize * this.spaceSize;
+                        }
+                        i++;
+                    }
+                    return this.tabs[i-1] * this.tabSize * this.spaceSize;
+                },
+                getFontSize: function(font){
+                    var numFind = /[0-9]+/;
+                    var number = numFind.exec(font)[0];
+                    if (isNaN(number)) {
+                        throw Error("SimpleTextStyler Cant find font size");
+                    }
+                    return Number(number);
+                },
+                setFont: function(font = ctx.font) {
+                    this.font = ctx.font = font;
+                    this.baseSize = this.getFontSize(font);
+                    for (var i = 32; i < 256; i ++) {
+                        this.sizes[i - 32] = ctx.measureText(String.fromCharCode(i), 0, 0).width/this.baseSize;
+                    }
+                    this.spaceSize = this.sizes[0];
+                },
+                drawText: function(context, text, x, y, size) {
+                    var ttext = text;
+                    var i, len, subText;
+                    var w, scale;
+                    var xx, yy, ctx;
+                    var state = [];
+                    if(text === undefined){ return }
+                    xx = x;
+                    yy = y;
+                    if (!context.setTransform) { // simple test if this is a 2D context
+                        if (context.ctx) { ctx = context.ctx } // may be a image with attached ctx?
+                        else{ return }
+                    } else { ctx = context }
+
+                    function renderText(text) {
+                        ctx.save();
+                        ctx.fillStyle = colour;
+                        ctx.translate(x, y)
+                        ctx.scale(scale, scale)
+                        ctx.fillText(text, 0, 0);
+                        ctx.restore();
+                    }
+                    var colour = ctx.fillStyle;
+                    ctx.font = this.font;
+                    len = text.length;
+                    subText = "";
+                    w = 0;
+                    i = 0;
+                    scale = size / this.baseSize;
+                    while (i < len) {
+                        const c = text[i];
+                        const cc = text.charCodeAt(i);
+                        if (cc < 256) { // only ascii
+                            if (this.controlChars.indexOf(c) > -1) {
+                                if (subText !== "") {
+                                    scale = size / this.baseSize;
+                                    renderText(subText);
+                                    x += w;
+                                    w = 0;
+                                    subText = "";                        
+                                }
+                                if (c === "\n") {  // return move to new line
+                                    x = xx;
+                                    y += size;
+                                } else if (c === "\t") { // tab move to next tab
+                                    x = this.getNextTab(x - xx) + xx;
+                                } else if (c === "{") {   // Text format delimiter                       
+                                    state.push({size, colour, x, y})
+                                    i += 1;
+                                    const t = text[i];
+                                    if (t === "+") {  // Increase size
+                                        size *= 1/(3/4);
+                                    } else if (t === "-") {  // decrease size
+                                        size *= 3/4;
+                                    } else if (t === "s") { // sub script
+                                        y += size * (1/3);
+                                        size  *= (2/3);
+                                    } else if (t === "S") { // super script
+                                        y -= size * (1/3);
+                                        size  *= (2/3);
+                                    } else if (t === "#") {
+                                        colour = text.substr(i,7);
+                                        i+= 6;
+                                    }
+                                } else if (c  === "}"){
+                                    const s = state.pop();
+                                    y = s.y;
+                                    size = s.size;
+                                    colour = s.colour;
+                                    scale = size / this.baseSize;
+                                }
+                            } else {
+                                subText += c;
+                                w += this.sizes[cc-32] * size;
+                            }
+                        }
+                        i += 1;
+                    }
+                    if (subText !== "") { renderText(subText) }
+                },
+            }
+            return simpleTextStyler;
+        })();
+
+
+  
+        function wrapText(context, text, x, y, maxWidth, lineHeight) {
+                var words = text.split(' ');
+                var line = '';
+  
+                for(var n = 0; n < words.length; n++) {
+    
+                    var testLine = line + words[n] + ' ';
+                    var metrics = context.measureText(testLine);
+                    var testWidth = metrics.width;
+    
+                    if (testWidth > maxWidth && n > 0) {
+    
+                        context.fillText(line, x, y);
+    
+                        line = words[n] + ' ';
+                        y += lineHeight;
+                    }
+                    else {
+                        line = testLine;
+                    }
+                }
+                
+                context.fillText(line, x, y);
+            }
+
+
+
+
+
+
+
+
+
+        function draw(event) {
+
+            bgImg.src = isGil.checked == true ? './img/bg_gil.png' : './img/bg.png';
+            bgImg.onload = () => {
+                ctx.drawImage(bgImg, 0, 0)
+            }
+
+            blankImg.src = canvas.toDataURL();
+            blankImg.onload = () => {
+                ctx.drawImage(blankImg, 0, 0)
+            }
+        }
+
+        draw()
+        
+
+
+
+        function submitChanges() {
+            ctx.drawImage(bgImg, 0, 0)
+
+
+            if(playerName.value != null | undefined | "") {
+                ctx.textAlign = 'center'
+                ctx.textBaseline = 'middle';
+                ctx.fillStyle = '#000000'
+
+                ctx.font = "68px Doppio One";
+
+                const text = ctx.measureText(playerName.value); // TextMetrics object
+                var x = 360;
+                var y = 745;
+
+                ctx.fillText(playerName.value, x, y);
+            }
+
+            if(playerLogo.value != null | undefined | "") {
+                logoImg.onload = () => ctx.drawImage(logoImg, 242, 388)
+                logoImg.onerror = err => { throw err }
+                logoImg.src = './img/'+playerLogo.value+'.png'
+            }
+
+            if(playerDeathReason.value != null | undefined | "") {
+                ctx.textAlign = 'start'
+  
+                if(isKicked.checked == true) {
+                    ctx.textAlign = 'center'
+
+                    ctx.font = 'bold 54px Doppio One'
+                        
+                    var text = ctx.measureText("EXPULSADO POR INACTIVIDAD")
+
+                    if(kickedReason.value != null | undefined | "") {
+                        text = ctx.measureText("EXPULSADO POR " + kickedReason.value)
+                    }
+
+                    ctx.fillStyle = '#EC0000';
+
+                    var x = 360;
+                    var y = 832;
+
+                    var maxWidth = 600;
+                    var lineHeight = 60;
+
+                    if(kickedReason.value != null | undefined | "") {
+                        wrapText(ctx, "EXPULSADO POR " + kickedReason.value, x, y, maxWidth, lineHeight);
+                    } else {
+                        wrapText(ctx, "EXPULSADO POR INACTIVIDAD", x, y, maxWidth, lineHeight);
+                    }
+                } else {
+                    ctx.font = 'bold 48px Doppio One'
+                    var text = ctx.measureText("Muerte: "+playerDeathReason.value)
+
+
+                    ctx.fillStyle = '#000000';
+
+                    var x = 360 - text.width/2;
+                    var y = 820;
+
+                    var maxWidth = 600;
+                    var lineHeight = 60;
+
+                    var pdrText = new String(playerDeathReason.value);
+                    var pdr2Text = new String(playerDeathReason2.value);
+
+                    if(isWinner.checked == true) {
+                        simpleTextStyler.setFont(); // set the current font
+                        simpleTextStyler.drawText(ctx, `{#FEFE00Muerte:} {#000000${pdrText}}`, x, y, 48)
+                    } else {
+                        simpleTextStyler.setFont(); // set the current font
+                        simpleTextStyler.drawText(ctx, `{#FF0000Muerte:} ${pdrText}`, x, y, 48)
+                        ctx.fillText(pdr2Text, x, y+48);
+                    }
+
+                }
+            }
+
+            if(deathDay.value != null | undefined | "") {
+                ctx.font = 'bold 48px Doppio One'
+                ctx.fillStyle = '#000000';
+                ctx.textAlign = 'center'
+
+                var x = 360;
+                var y = 980;
+  
+                ctx.fillText("Día: " + deathDay.value, x, y)
+            }
+        }
+
+        function downloadImg() {
+              var link = document.createElement('a');
+              link.download = 'Imagen de Muerte PSL (Pibes Sin Limites).png';
+              link.href = canvas.toDataURL("image/png", 1.0)
+              link.click();
+        }
+
+        /*
+
+  
+  
+  
+  
+  
+            ctx.textAlign = 'center'
+  
+            function drawPlayerDeathDay() {
+                ctx.font = 'bold 48px Doppio One'
+                ctx.fillStyle = '#000000';
+  
+                var x = 360;
+                var y = 980;
+  
+                ctx.fillText("Día: " + deathDay, x, y)
+            }
+            
+  
+  
+  
+  
+            function drawWinnerEffect() {
+                if(isWinner == true) {
+                    ctx.shadowColor = "#FFFF11";
+                    ctx.shadowOffsetX = 0;
+                    ctx.shadowOffsetY = 0;
+                    ctx.shadowBlur = 50;
+  
+                    ctx.fillStyle = "#00000000";
+                    ctx.fillRect(220, 366, 280, 282);
+                } else {
+  
+                }
+  
+            }
+  
+  
+  
+  
+  
+  
+        function submitChanges() {
+  
+  
+            function drawBackground() {
+                const img = new Image()
+                img.onload = () => ctx.drawImage(img, 0, 0)
+                img.onerror = err => { throw err }
+                if(isGil != true) { 
+                    img.src = './img/bg.png'
+                } else {
+                    img.src = './img/bg_gil.png'
+                }
+            } 
+
+            drawBackground()
+  
+  
+  
+  
+  
+            function drawPlayerUsername() {
+                ctx.font = 'bold 68px Doppio One'
+                var text = ctx.measureText(playerName)
+  
+                var x = 360;
+                var y = 740;
+  
+                ctx.fillText(playerName, x, y)
+            }
+  
+            drawPlayerUsername()
+  
+  
+  
+  
+  
+  
+  
+  
+            function wrapText(context, text, x, y, maxWidth, lineHeight) {
+                var words = text.split(' ');
+                var line = '';
+  
+                for(var n = 0; n < words.length; n++) {
+  
+                var muerte = context.measureText("Muerte: ");
+                var muerteWidth = muerte.width;
+  
+                var testLine = line + words[n] + ' ';
+                var metrics = context.measureText(testLine);
+                var testWidth = metrics.width;
+  
+                if (testWidth > maxWidth && n > 0) {
+  
+                    context.fillText(line, x, y);
+  
+                    line = words[n] + ' ';
+                    y += lineHeight;
+                }
+                else {
+                    line = testLine;
+                }
+                }
+                context.fillText(line, x, y);
+            }
+            
+  
+  
+  
+  
+  
+            ctx.textAlign = 'start'
+  
+            function drawPlayerDeathReason() {
+                if(isKicked == true) {
+                    ctx.textAlign = 'center'
+  
+                    ctx.font = 'bold 60px Doppio One'
+                    
+                    var text = ctx.measureText("EXPULSADO POR INACTIVIDAD")
+  
+                    if(kickedReason != null) {
+                        text = ctx.measureText("EXPULSADO POR " + kickedReason)
+                    }
+  
+                    ctx.fillStyle = '#EC0000';
+  
+                    var x = 360;
+                    var y = 832;
+  
+                    var maxWidth = 600;
+                    var lineHeight = 60;
+  
+                    if(kickedReason != null) {
+                        wrapText(ctx, "EXPULSADO POR " + kickedReason, x, y, maxWidth, lineHeight);
+                    } else {
+                        wrapText(ctx, "EXPULSADO POR INACTIVIDAD", x, y, maxWidth, lineHeight);
+                    }
+                } else {
+                    ctx.font = 'bold 48px Doppio One'
+                    var text = ctx.measureText("Muerte: "+playerDeathReason)
+  
+                        // Create gradient
+                    var gradient = ctx.createLinearGradient(0, 0, 260, 0);
+                    gradient.addColorStop(0, "#EC0000");
+                    gradient.addColorStop(0.99, "#EC0000");
+                    gradient.addColorStop(1.0, "black");
+  
+                    // Fill with gradient
+                    //ctx.fillStyle = gradient;
+                    ctx.fillStyle = '#EC0000';
+  
+                    var x = 360 - text.width/2;
+                    var y = 820;
+  
+                    var maxWidth = 600;
+                    var lineHeight = 60;
+  
+                    //wrapText(ctx, "Muerte: " + playerDeathReason, x, y, maxWidth, lineHeight);
+  
+                    if(isWinner == true) {
+                        simpleTextStyler.setFont(); // set the current font
+                        simpleTextStyler.drawText(ctx, "{#FEFE00Muerte:} {#000000"+playerDeathReason+"}", x, y, 48)
+                    } else {
+                        simpleTextStyler.setFont(); // set the current font
+                        simpleTextStyler.drawText(ctx, "{#FF0000Muerte:} {#000000"+playerDeathReason+"}", x, y, 48)
+                    }
+  
+                    //ctx.fillText("Muerte: " + playerDeathReason, 360, 820)
+                }
+            }
+            
+            drawPlayerDeathReason();
+  
+  
+  
+  
+  
+            ctx.textAlign = 'center'
+  
+            function drawPlayerDeathDay() {
+                ctx.font = 'bold 48px Doppio One'
+                ctx.fillStyle = '#000000';
+  
+                var x = 360;
+                var y = 980;
+  
+                ctx.fillText("Día: " + deathDay, x, y)
+            }
+            
+            drawPlayerDeathDay();
+  
+  
+  
+  
+            function drawWinnerEffect() {
+                if(isWinner == true) {
+                    ctx.shadowColor = "#FFFF11";
+                    ctx.shadowOffsetX = 0;
+                    ctx.shadowOffsetY = 0;
+                    ctx.shadowBlur = 50;
+  
+                    ctx.fillStyle = "#00000000";
+                    ctx.fillRect(220, 366, 280, 282);
+                } else {
+  
+                }
+  
+            }
+  
+            drawWinnerEffect()
+  
+  
+            /*
+            function drawPlayerLogo() {
+                const img = new Image()
+                img.src = './img/'+playerLogo+'.png'
+                if(playerID != null) {
+                  img.src = './img/'+playerID+'.png'
+                }
+                img.onload = () => ctx.drawImage(img, 242, 388)
+                img.onerror = err => { throw err }
+            }
+            
+            drawPlayerLogo();
+            */
+            /*
+            console.log("a")
+        }
+
+        function downloadImg() {
+              var link = document.createElement('a');
+              link.download = 'Imagen de Muerte PSL (Pibes Sin Limites).png';
+              link.href = can1.toDataURL("image/png", 1.0)
+              link.click();
+            }
+
+
+
+        function downloadURL(url, name) {
+              var link = document.createElement("a");
+              link.download = name;
+              link.href = url;
+              document.body.appendChild(link);
+              link.click();
+              document.body.removeChild(link);
+              delete link;
+            }
+
+            function downloadFile() {
+              canvas.toBlob((blob) => {
+                const newImg = document.createElement("img");
+                const url = URL.createObjectURL(blob);
+
+                /*
+                newImg.onload = () => {
+                  // no longer need to read the blob so it's revoked
+                  URL.revokeObjectURL(url);
+                };
+                */
+                /*
+                downloadURL(url, "Imagen de Muerte PSL (pibes sin limites).png");
+
+              }, "image/png");
+
+              var data = "okay this is epic";
+              var blob = new Blob([data], {type: 'image/png'});
+              var url  = window.URL.createObjectURL(blob);
+            }
+            */
+      </script>
+    </div>
+  </body>
+</html>

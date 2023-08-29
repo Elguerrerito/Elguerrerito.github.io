@@ -1,0 +1,56 @@
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@500&display=swap");
+
+
+
+
+
+body {
+    font-family: 'Arial';
+    background-color: #474747;
+    background-size: cover;
+    background-position: 0px 0px;
+
+    overflow: hidden; /* Hide scrollbars */
+}
+
+div.left {
+    background-color: #476767;
+
+    width: 33vw;
+    height: 98vh;
+}
+
+div.center {
+    position: relative;
+
+    top: 50%;
+    left: 33vw;
+    margin-top: -47.5%;
+    margin-left: 0%;
+
+
+    width: 33vw;
+    height: 98vh;
+}
+
+div.right {
+    position: relative;
+
+    top: 50%;
+    left: 66vw;
+    margin-top: -48%;
+    margin-left: 0%;
+    
+    align-content: center;
+
+    width: 32.8vw;
+    height: 98vh;
+}
+
+#canvas {
+
+    border: solid black 2px;
+    
+    width: 360px;
+    height: 540px;
+}

@@ -11,31 +11,34 @@
     <title>Generador</title>
   </head>
   <body>
-    <div class="left" style="font-size: 12px;">
+    <div class="left" style="font-size: 16px;">
             Nombre o Nick del streamer que aparecerá en la imagen.<br>
-            <input type="text" id="playerName" class="playerName" placeholder="Nombre del jugador" oninput=""><br><br>
+            <input type="text" id="playerName" class="textInput" placeholder="Nombre del jugador" oninput=""><br><br>
 
-            Nombre del logo del streamer en la carpeta 'img'(Casi siempre es el mismo nombre que el de arriba).<br>
-            <input type="text" id="playerLogo" class="playerLogo" placeholder="Imagen del jugador" oninput=""><br><br>
+            Nombre del logo del streamer(Casi siempre es el mismo nombre que el de arriba, si no revisa la lista).<br>
+            <input type="text" id="playerLogo" class="textInput" placeholder="Imagen del jugador" oninput=""><br><br>
 
             Razón de muerte.<br>
-            <input type="text" id="playerDeathReason" class="playerDeathReason" placeholder="Razón de muerte 1" oninput=""><br><br>
-            Si quieres añadir una segunda linea escribela aqui.
-            <input type="text" id="playerDeathReason2" class="playerDeathReason" placeholder="Razón de muerte 2" oninput=""><br><br>
+            <input type="text" id="playerDeathReason" class="textInput" placeholder="Razón de muerte 1" oninput=""><br><br>
+            Si quieres añadir una segunda linea escribela aqui.<br>
+            <input type="text" id="playerDeathReason2" class="textInput" placeholder="Razón de muerte 2" oninput=""><br><br>
 
-            Este es el numero que aparece en el 'Día: ?',cambialo segun el día.<br>
-            <input type="text" id="deathDay" class="deathDay" placeholder="Día" oninput=""><br><br>
+            Este es el numero que aparece en el 'Día: ?', cambialo segun el día.<br>
+            <input type="text" id="deathDay" class="textInput" placeholder="Día" oninput=""><br><br>
 
-            Este parametro generará una imagen que diga que el jugador fue expulsado de la serie por inactividad contexto en mayusculas. Cambialo a true para activarlo (con todo y las "").<br>
-            <input type="checkbox" id="isKicked" class="isKicked"><br>
-            Sirve para cambiar la razón de la expulsión, si quieres cambiarla recuerda ponerlo en mayusculas y este no es necesario usar '\n' para añadir lineas, si no quieres cambiarla dejala en "null" (con todo y las "").<br>
-            <input type="text" id="kickedReason" class="kickedReason" placeholder="Razón de kick" oninput=""><br><br>
 
-            Este parametro generará una imagen con los colores de los giles (los colores invertidos que aparecian cuando anunciaste a los giles en twitter/x.com).Cambialo a true para activarlo (con todo y las "").<br>
-            <input type="checkbox" id="isGil" class="isGil"><br><br>
+            Este parametro generará una imagen que diga que el jugador fue expulsado de la serie.<br>
+            <input type="checkbox" id="isKicked" class="checkboxInput"><br>
 
-            Este parametro añadira un efecto amarillo alrededor del logo del streamer y cambiara el color de 'Muerte:' a amarillo.Cambialo a true para activarlo (con todo y las "").<br>
-            <input type="checkbox" id="isWinner" class="isWinner"><br><br>
+            Sirve para cambiar la razón de la expulsión.<br>
+            <input type="text" id="kickedReason" class="textInput" placeholder="Razón de kick" oninput=""><br><br>
+
+
+            Este parametro generará una imagen con los colores de los giles.<br>
+            <input type="checkbox" id="isGil" class="checkboxInput"><br><br>
+
+            Activa el modo ganador (añade un efecto amarillo alrededor del logo y en el texto de muerte).<br>
+            <input type="checkbox" id="isWinner" class="checkboxInput"><br><br>
     </div>
     <div class="center">
         <p>
@@ -65,8 +68,8 @@
             </ol>
         </p>
         
-        <button name="submitChanges" onclick="submitChanges()">Cargar Cambios</button>
-        <button name="downloadButton" onclick="downloadImg()">Descargar</button>
+        <button id="submitChanges" name="submitChanges" onclick="submitChanges()">Cargar Cambios</button>
+        <button id="downloadButton" name="downloadButton" onclick="downloadImg()">Descargar</button>
 
     </div>
     <div class="right">
@@ -295,6 +298,15 @@
             }
 
             if(playerLogo.value != null | undefined | "") {
+                if(isWinner.checked == true) {
+                    ctx.shadowColor = "#FFFF11";
+                    ctx.shadowOffsetX = 0;
+                    ctx.shadowOffsetY = 0;
+                    ctx.shadowBlur = 50;
+
+                    ctx.fillStyle = "#00000000";
+                    ctx.fillRect(220, 366, 280, 282);
+                }
                 logoImg.onload = () => ctx.drawImage(logoImg, 242, 388)
                 logoImg.onerror = err => { throw err }
                 logoImg.src = './img/'+playerLogo.value+'.png'

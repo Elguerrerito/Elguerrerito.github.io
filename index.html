@@ -95,6 +95,7 @@
 
         const blankImg = new Image();
         const bgImg = new Image();
+        const bgGilImg = new Image();
         const logoImg = new Image();
 
 
@@ -263,10 +264,16 @@
 
         function draw(event) {
 
-            bgImg.src = isGil.checked == true ? './img/bg_gil.png' : './img/bg.png';
+            bgGilImg.src = './img/bg_gil.png';
+            bgGilImg.onload = () => {
+                ctx.drawImage(bgGilImg, 0, 0)
+            }
+
+            bgImg.src = './img/bg.png';
             bgImg.onload = () => {
                 ctx.drawImage(bgImg, 0, 0)
             }
+
 
             blankImg.src = canvas.toDataURL();
             blankImg.onload = () => {
@@ -282,6 +289,9 @@
         function submitChanges() {
             ctx.drawImage(bgImg, 0, 0)
 
+            if(isGil.checked) {
+                ctx.drawImage(bgGilImg, 0, 0)
+            }
 
             if(playerName.value != null | undefined | "") {
                 ctx.textAlign = 'center'
@@ -306,7 +316,15 @@
 
                     ctx.fillStyle = "#00000000";
                     ctx.fillRect(220, 366, 280, 282);
+                } else {
+                    ctx.shadowColor = "#FFFF1100";
+                    ctx.shadowOffsetX = 0;
+                    ctx.shadowOffsetY = 0;
+                    ctx.shadowBlur = 0;
+
+                    ctx.fillStyle = "#00000000";
                 }
+
                 logoImg.onload = () => ctx.drawImage(logoImg, 242, 388)
                 logoImg.onerror = err => { throw err }
                 logoImg.src = './img/'+playerLogo.value+'.png'
@@ -334,7 +352,7 @@
                     var maxWidth = 600;
                     var lineHeight = 60;
 
-                    if(kickedReason.value != null | undefined | "") {
+                    if(kickedReason.value != null | undefined | "" && kickedReason.value.length > 1) {
                         wrapText(ctx, "EXPULSADO POR " + kickedReason.value, x, y, maxWidth, lineHeight);
                     } else {
                         wrapText(ctx, "EXPULSADO POR INACTIVIDAD", x, y, maxWidth, lineHeight);
@@ -358,6 +376,7 @@
                     if(isWinner.checked == true) {
                         simpleTextStyler.setFont(); // set the current font
                         simpleTextStyler.drawText(ctx, `{#FEFE00Muerte:} {#000000${pdrText}}`, x, y, 48)
+                        ctx.fillText(pdr2Text, x, y+48);
                     } else {
                         simpleTextStyler.setFont(); // set the current font
                         simpleTextStyler.drawText(ctx, `{#FF0000Muerte:} ${pdrText}`, x, y, 48)
@@ -386,279 +405,6 @@
               link.click();
         }
 
-        /*
-
-  
-  
-  
-  
-  
-            ctx.textAlign = 'center'
-  
-            function drawPlayerDeathDay() {
-                ctx.font = 'bold 48px Doppio One'
-                ctx.fillStyle = '#000000';
-  
-                var x = 360;
-                var y = 980;
-  
-                ctx.fillText("Día: " + deathDay, x, y)
-            }
-            
-  
-  
-  
-  
-            function drawWinnerEffect() {
-                if(isWinner == true) {
-                    ctx.shadowColor = "#FFFF11";
-                    ctx.shadowOffsetX = 0;
-                    ctx.shadowOffsetY = 0;
-                    ctx.shadowBlur = 50;
-  
-                    ctx.fillStyle = "#00000000";
-                    ctx.fillRect(220, 366, 280, 282);
-                } else {
-  
-                }
-  
-            }
-  
-  
-  
-  
-  
-  
-        function submitChanges() {
-  
-  
-            function drawBackground() {
-                const img = new Image()
-                img.onload = () => ctx.drawImage(img, 0, 0)
-                img.onerror = err => { throw err }
-                if(isGil != true) { 
-                    img.src = './img/bg.png'
-                } else {
-                    img.src = './img/bg_gil.png'
-                }
-            } 
-
-            drawBackground()
-  
-  
-  
-  
-  
-            function drawPlayerUsername() {
-                ctx.font = 'bold 68px Doppio One'
-                var text = ctx.measureText(playerName)
-  
-                var x = 360;
-                var y = 740;
-  
-                ctx.fillText(playerName, x, y)
-            }
-  
-            drawPlayerUsername()
-  
-  
-  
-  
-  
-  
-  
-  
-            function wrapText(context, text, x, y, maxWidth, lineHeight) {
-                var words = text.split(' ');
-                var line = '';
-  
-                for(var n = 0; n < words.length; n++) {
-  
-                var muerte = context.measureText("Muerte: ");
-                var muerteWidth = muerte.width;
-  
-                var testLine = line + words[n] + ' ';
-                var metrics = context.measureText(testLine);
-                var testWidth = metrics.width;
-  
-                if (testWidth > maxWidth && n > 0) {
-  
-                    context.fillText(line, x, y);
-  
-                    line = words[n] + ' ';
-                    y += lineHeight;
-                }
-                else {
-                    line = testLine;
-                }
-                }
-                context.fillText(line, x, y);
-            }
-            
-  
-  
-  
-  
-  
-            ctx.textAlign = 'start'
-  
-            function drawPlayerDeathReason() {
-                if(isKicked == true) {
-                    ctx.textAlign = 'center'
-  
-                    ctx.font = 'bold 60px Doppio One'
-                    
-                    var text = ctx.measureText("EXPULSADO POR INACTIVIDAD")
-  
-                    if(kickedReason != null) {
-                        text = ctx.measureText("EXPULSADO POR " + kickedReason)
-                    }
-  
-                    ctx.fillStyle = '#EC0000';
-  
-                    var x = 360;
-                    var y = 832;
-  
-                    var maxWidth = 600;
-                    var lineHeight = 60;
-  
-                    if(kickedReason != null) {
-                        wrapText(ctx, "EXPULSADO POR " + kickedReason, x, y, maxWidth, lineHeight);
-                    } else {
-                        wrapText(ctx, "EXPULSADO POR INACTIVIDAD", x, y, maxWidth, lineHeight);
-                    }
-                } else {
-                    ctx.font = 'bold 48px Doppio One'
-                    var text = ctx.measureText("Muerte: "+playerDeathReason)
-  
-                        // Create gradient
-                    var gradient = ctx.createLinearGradient(0, 0, 260, 0);
-                    gradient.addColorStop(0, "#EC0000");
-                    gradient.addColorStop(0.99, "#EC0000");
-                    gradient.addColorStop(1.0, "black");
-  
-                    // Fill with gradient
-                    //ctx.fillStyle = gradient;
-                    ctx.fillStyle = '#EC0000';
-  
-                    var x = 360 - text.width/2;
-                    var y = 820;
-  
-                    var maxWidth = 600;
-                    var lineHeight = 60;
-  
-                    //wrapText(ctx, "Muerte: " + playerDeathReason, x, y, maxWidth, lineHeight);
-  
-                    if(isWinner == true) {
-                        simpleTextStyler.setFont(); // set the current font
-                        simpleTextStyler.drawText(ctx, "{#FEFE00Muerte:} {#000000"+playerDeathReason+"}", x, y, 48)
-                    } else {
-                        simpleTextStyler.setFont(); // set the current font
-                        simpleTextStyler.drawText(ctx, "{#FF0000Muerte:} {#000000"+playerDeathReason+"}", x, y, 48)
-                    }
-  
-                    //ctx.fillText("Muerte: " + playerDeathReason, 360, 820)
-                }
-            }
-            
-            drawPlayerDeathReason();
-  
-  
-  
-  
-  
-            ctx.textAlign = 'center'
-  
-            function drawPlayerDeathDay() {
-                ctx.font = 'bold 48px Doppio One'
-                ctx.fillStyle = '#000000';
-  
-                var x = 360;
-                var y = 980;
-  
-                ctx.fillText("Día: " + deathDay, x, y)
-            }
-            
-            drawPlayerDeathDay();
-  
-  
-  
-  
-            function drawWinnerEffect() {
-                if(isWinner == true) {
-                    ctx.shadowColor = "#FFFF11";
-                    ctx.shadowOffsetX = 0;
-                    ctx.shadowOffsetY = 0;
-                    ctx.shadowBlur = 50;
-  
-                    ctx.fillStyle = "#00000000";
-                    ctx.fillRect(220, 366, 280, 282);
-                } else {
-  
-                }
-  
-            }
-  
-            drawWinnerEffect()
-  
-  
-            /*
-            function drawPlayerLogo() {
-                const img = new Image()
-                img.src = './img/'+playerLogo+'.png'
-                if(playerID != null) {
-                  img.src = './img/'+playerID+'.png'
-                }
-                img.onload = () => ctx.drawImage(img, 242, 388)
-                img.onerror = err => { throw err }
-            }
-            
-            drawPlayerLogo();
-            */
-            /*
-            console.log("a")
-        }
-
-        function downloadImg() {
-              var link = document.createElement('a');
-              link.download = 'Imagen de Muerte PSL (Pibes Sin Limites).png';
-              link.href = can1.toDataURL("image/png", 1.0)
-              link.click();
-            }
-
-
-
-        function downloadURL(url, name) {
-              var link = document.createElement("a");
-              link.download = name;
-              link.href = url;
-              document.body.appendChild(link);
-              link.click();
-              document.body.removeChild(link);
-              delete link;
-            }
-
-            function downloadFile() {
-              canvas.toBlob((blob) => {
-                const newImg = document.createElement("img");
-                const url = URL.createObjectURL(blob);
-
-                /*
-                newImg.onload = () => {
-                  // no longer need to read the blob so it's revoked
-                  URL.revokeObjectURL(url);
-                };
-                */
-                /*
-                downloadURL(url, "Imagen de Muerte PSL (pibes sin limites).png");
-
-              }, "image/png");
-
-              var data = "okay this is epic";
-              var blob = new Blob([data], {type: 'image/png'});
-              var url  = window.URL.createObjectURL(blob);
-            }
-            */
       </script>
     </div>
   </body>

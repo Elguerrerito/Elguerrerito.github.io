@@ -54,3 +54,60 @@ div.right {
     width: 360px;
     height: 540px;
 }
+
+#downloadButton {
+    padding: 10px 20px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+
+    transition: 0.35s;
+}
+
+#downloadButton:hover {
+    background-color: #357538;
+}
+
+
+#submitChanges {
+    padding: 10px 20px;
+    background-color: #307fff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+
+    transition: 0.35s;
+}
+
+#submitChanges:hover {
+    background-color: #2456a6;
+}
+
+
+
+
+
+
+.textInput {
+    border-radius: 5px;
+    border: 2px solid #307fff;
+}
+
+.checkboxInput {
+    cursor: pointer;
+    background-color: #fff;
+    background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='white' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M12.207 4.793a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L6.5 9.086l4.293-4.293a1 1 0 011.414 0z'/%3e%3c/svg%3e");
+    background-position-x: center;
+    background-repeat: no-repeat;
+    width: 48px;
+    height: 20px;
+    appearance: none;
+    border: 2px solid #888;
+}
+
+.checkboxInput:checked {
+    background-color: rgb(21, 187, 18);
+}
